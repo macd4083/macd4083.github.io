@@ -2,8 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Slideshow</title>
+  <title>Photo Slideshow</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .slideshow {
+      position: relative;
+      width: 80%;
+      max-width: 800px;
+    }
+
+    .slideshow img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 10px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    #prev { left: 10px; }
+    #next { right: 10px; }
+  </style>
 </head>
 <body>
   <div class="slideshow">
@@ -11,6 +48,40 @@
     <button id="prev">&#10094;</button>
     <button id="next">&#10095;</button>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    const images = [
+      'images/photo1.JPG',
+      'images/photo2.JPG',
+      'images/photo3.jpg'
+    ];
+
+    let current = 0;
+    const imgEl = document.getElementById('main-image');
+
+    function showImage(index) {
+      imgEl.src = images[index];
+    }
+
+    document.getElementById('prev').onclick = () => {
+      current = (current - 1 + images.length) % images.length;
+      showImage(current);
+    };
+
+    document.getElementById('next').onclick = () => {
+      current = (current + 1) % images.length;
+      showImage(current);
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        current = (current - 1 + images.length) % images.length;
+        showImage(current);
+      } else if (e.key === 'ArrowRight' || e.key === 'd') {
+        current = (current + 1) % images.length;
+        showImage(current);
+      }
+    });
+  </script>
 </body>
 </html>
