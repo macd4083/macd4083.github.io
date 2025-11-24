@@ -8,45 +8,45 @@ body {
 /* Hero section with fixed background */
 .hero {
   position: relative;
-  height: 100vh; /* full screen height */
+  height: 60vh; /* shorter hero so white section shows sooner */
   background: url('images/fit.jpg') no-repeat center center fixed;
   background-size: cover;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end; /* intro sits near bottom */
-  text-align: center;
-  color: #333;
 }
 
 /* White gradient overlay fading down */
 .hero::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
   pointer-events: none;
 }
 
-/* Intro content sits above overlay */
-.intro {
-  position: relative;
-  z-index: 1;
-  padding: 40px 20px;
-}
-
-/* Profile picture overlapping background */
+/* Face picture overlaps into white section */
 .profile-pic {
   width: 140px;
   height: 140px;
   border-radius: 50%;
   border: 4px solid #fff;
-  margin-bottom: 20px;
-  position: relative;
-  top: -70px; /* overlaps background by more than half */
+  position: absolute;
+  bottom: -70px; /* pushes it down into the bio section */
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 2;
+}
+
+/* Intro section over white */
+.bio {
+  background: #fff;
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #333;
+  padding-top: 100px; /* space for overlapping face pic */
 }
 
 /* Slideshow section */
