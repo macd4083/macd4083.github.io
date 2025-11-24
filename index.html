@@ -8,20 +8,44 @@
     body {
       margin: 0;
       background-color: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Bio section */
+    .bio {
+      height: 40vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9f9f9;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Slideshow wrapper */
+    .slideshow-section {
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      background-color: white;
     }
 
+    /* Your existing slideshow styles */
     .slideshow {
       position: relative;
-      width: 80%;
-      max-width: 800px;
+      width: 90%;       /* slim white bars on sides */
+      height: 90vh;     /* nearly full screen */
+      max-width: 1200px;
+      overflow: hidden;
     }
 
     .slideshow img {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-radius: 8px;
     }
 
@@ -43,12 +67,22 @@
   </style>
 </head>
 <body>
-  <div class="slideshow">
-    <img id="main-image" src="images/photo1.JPG" alt="Slideshow Image" />
-    <button id="prev">&#10094;</button>
-    <button id="next">&#10095;</button>
-  </div>
+  <!-- Bio Section -->
+  <section class="bio">
+    <h1>Matt Macdonald</h1>
+    <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
+  </section>
 
+  <!-- Slideshow Section -->
+  <section class="slideshow-section">
+    <div class="slideshow">
+      <img id="main-image" src="images/photo1.JPG" alt="Slideshow Image" />
+      <button id="prev">&#10094;</button>
+      <button id="next">&#10095;</button>
+    </div>
+  </section>
+
+  <!-- Your existing slideshow JS -->
   <script>
     const images = [
       'images/photo1.JPG',
