@@ -11,7 +11,7 @@ body {
   background: url('images/fit.jpg') no-repeat center center fixed;
   background-size: cover;
   min-height: 80vh;        /* taller hero so more image shows */
-  padding-bottom: 120px;   /* pushes content down, reveals more background */
+  padding-bottom: 200px;   /* pushes content down, reveals more background */
 }
 
 /* White gradient overlay fading down */
