@@ -9,10 +9,10 @@ body {
 .hero {
   position: relative;
   background: url('images/fit.jpg') no-repeat center center fixed;
-  background-size: cover;
-  height: auto;          /* let it fit content */
-  min-height: 50vh;      /* optional: ensure it’s at least half the viewport */
-  padding-bottom: 100px; /* space for the overlapping face pic */
+  background-size: contain;   /* show entire image */
+  background-repeat: no-repeat;
+  background-color: #fff;     /* fills any empty space */
+  min-height: 60vh;           /* keep some vertical size */
 }
 
 /* White gradient overlay fading down */
