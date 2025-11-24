@@ -4,98 +4,6 @@
   <meta charset="UTF-8" />
   <title>Photo Slideshow</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      background-color: #fff;
-      font-family: Arial, sans-serif;
-    }
-
-    /* Hero section with fixed background */
-    .hero {
-      position: relative;
-      height: 100vh; /* full screen height */
-      background: url('images/fit.jpg') no-repeat center center fixed;
-      background-size: cover;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end; /* intro sits near bottom */
-      text-align: center;
-      color: #333;
-    }
-
-    /* White gradient overlay fading down */
-    .hero::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
-      pointer-events: none;
-    }
-
-    /* Intro content sits above overlay */
-    .intro {
-      position: relative;
-      z-index: 1;
-      background: transparent;
-      padding: 40px 20px;
-    }
-
-    /* Profile picture overlapping background */
-    .profile-pic {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      margin-bottom: 20px;
-      position: relative;
-      top: -70px; /* overlaps background by more than half */
-      z-index: 2;
-    }
-
-    /* Slideshow section */
-    .slideshow-section {
-      background-color: #fff;
-      padding: 40px 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* Slideshow container */
-    .slideshow {
-      position: relative;
-      max-width: 90%;
-      max-height: 90vh;
-      overflow: hidden;
-    }
-
-    .slideshow img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 8px;
-    }
-
-    button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 2rem;
-      background: rgba(0, 0, 0, 0.3);
-      border: none;
-      color: white;
-      padding: 10px;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    #prev { left: 10px; }
-    #next { right: 10px; }
-  </style>
 </head>
 <body>
   <!-- Hero Section with background -->
@@ -113,8 +21,8 @@
   <section class="slideshow-section">
     <div class="slideshow">
       <img id="main-image" src="images/photo1.JPG" alt="Slideshow Image" />
-      <button id="prev">&#10094;</button>
-      <button id="next">&#10095;</button>
+      <button id="prev" aria-label="Previous">&#10094;</button>
+      <button id="next" aria-label="Next">&#10095;</button>
     </div>
   </section>
 
