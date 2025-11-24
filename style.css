@@ -8,9 +8,11 @@ body {
 /* Hero section with fixed background */
 .hero {
   position: relative;
-  height: 80vh; /* top background area */
   background: url('images/fit.jpg') no-repeat center center fixed;
   background-size: cover;
+  height: auto;          /* let it fit content */
+  min-height: 50vh;      /* optional: ensure it’s at least half the viewport */
+  padding-bottom: 100px; /* space for the overlapping face pic */
 }
 
 /* White gradient overlay fading down */
