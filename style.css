@@ -1,25 +1,55 @@
-/* Reset body for vertical flow */
+/* Reset body */
 body {
   margin: 0;
-  background-color: #fff; /* white background for whole page */
+  background-color: #fff;
   font-family: Arial, sans-serif;
-  display: block;         /* normal block layout */
-  min-height: 100%;       /* allow scrolling */
 }
 
-/* Intro section */
-.bio {
-  min-height: 60vh;       /* gives white space around intro */
+/* Hero section with fixed background */
+.hero {
+  position: relative;
+  height: 100vh; /* full screen height */
+  background: url('images/fit.jpg') no-repeat center center fixed;
+  background-size: cover;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end; /* intro sits near bottom */
   text-align: center;
   color: #333;
-  padding: 20px;
 }
 
-/* Slideshow wrapper */
+/* White gradient overlay fading down */
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+/* Intro content sits above overlay */
+.intro {
+  position: relative;
+  z-index: 1;
+  padding: 40px 20px;
+}
+
+/* Profile picture overlapping background */
+.profile-pic {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  margin-bottom: 20px;
+  position: relative;
+  top: -70px; /* overlaps background by more than half */
+  z-index: 2;
+}
+
+/* Slideshow section */
 .slideshow-section {
   background-color: #fff;
   padding: 40px 0;
@@ -29,12 +59,13 @@ body {
 }
 
 /* Slideshow container */
- position: relative;
+.slideshow {
+  position: relative;
   width: 90%;
-  height: auto;          /* let height adjust to image */
   max-width: 1200px;
+  height: 90vh;
   margin: 0 auto;
-  background: #fff;      /* white background to match page */
+  background: #fff;
   border-radius: 8px;
   overflow: hidden;
 
@@ -43,18 +74,17 @@ body {
   align-items: center;
 }
 
+/* Images show full size without cropping */
 .slideshow img {
-  width: auto;
   max-width: 100%;
-  height: auto;
-  max-height: 90vh;      /* never taller than viewport */
-  object-fit: contain;   /* keep full image visible */
+  max-height: 100%;
+  object-fit: contain; /* keep full image visible */
   display: block;
   margin: 0 auto;
   border-radius: 8px;
 }
 
-/* Buttons unchanged */
+/* Buttons */
 button {
   position: absolute;
   top: 50%;
