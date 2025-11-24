@@ -9,10 +9,9 @@ body {
 .hero {
   position: relative;
   background: url('images/fit.jpg') no-repeat center center fixed;
-  background-size: contain;   /* show entire image */
-  background-repeat: no-repeat;
-  background-color: #fff;     /* fills any empty space */
-  min-height: 60vh;           /* keep some vertical size */
+  background-size: cover;
+  min-height: 80vh;        /* taller hero so more image shows */
+  padding-bottom: 120px;   /* pushes content down, reveals more background */
 }
 
 /* White gradient overlay fading down */
@@ -24,7 +23,7 @@ body {
   /* keep transparent until ~70%, then fade to white */
   background: linear-gradient(
     to bottom,
-    rgba(255,255,255,0) 90%,
+    rgba(255,255,255,0) 80%,
     rgba(255,255,255,0.6) 100%
   );
   pointer-events: none;
@@ -43,7 +42,7 @@ body {
   z-index: 2;
   display: block;
   /* add soft blending glow */
-  box-shadow: 0 0 20px rgba(255,255,255,0.7);
+  box-shadow: 0 0 40px rgba(255,255,255,0.7);
 }
 
 /* Intro section (white background) */
@@ -56,7 +55,7 @@ body {
   align-items: center;
   text-align: center;
   color: #333;
-  padding-top: 120px; /* space for overlapping face pic */
+  padding-top: 100px; /* space for overlapping face pic */
 }
 
 /* Slideshow section */
