@@ -7,20 +7,53 @@
   <style>
     body {
       margin: 0;
-      background-color: #fff; /* white background for whole page */
+      background-color: #fff;
       font-family: Arial, sans-serif;
     }
 
-    /* Intro section */
-    .bio {
-      min-height: 60vh; /* gives white space around it */
+    /* Hero section with fixed background */
+    .hero {
+      position: relative;
+      height: 100vh; /* full screen height */
+      background: url('images/fit.jpg') no-repeat center center fixed;
+      background-size: cover;
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
+      align-items: flex-end; /* intro sits near bottom */
       text-align: center;
       color: #333;
-      padding: 20px;
+    }
+
+    /* White gradient overlay fading down */
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+
+    /* Intro content sits above overlay */
+    .intro {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      padding: 40px 20px;
+    }
+
+    /* Profile picture overlapping background */
+    .profile-pic {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      margin-bottom: 20px;
+      position: relative;
+      top: -70px; /* overlaps background by more than half */
+      z-index: 2;
     }
 
     /* Slideshow section */
@@ -35,14 +68,14 @@
     /* Slideshow container */
     .slideshow {
       position: relative;
-      max-width: 90%;   /* slim white bars on sides */
-      max-height: 90vh; /* fixed size, doesn’t change when scrolling */
+      max-width: 90%;
+      max-height: 90vh;
       overflow: hidden;
     }
 
     .slideshow img {
       width: 100%;
-      height: auto;     /* show full image without cropping */
+      height: auto;
       display: block;
       border-radius: 8px;
     }
@@ -65,10 +98,13 @@
   </style>
 </head>
 <body>
-  <!-- Intro Section -->
-  <section class="bio">
-    <h1>Matt Macdonald</h1>
-    <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="intro">
+      <img class="profile-pic" src="images/face.jpg" alt="Matt Macdonald" />
+      <h1>Matt Macdonald</h1>
+      <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
+    </div>
   </section>
 
   <!-- Slideshow Section -->
@@ -80,7 +116,7 @@
     </div>
   </section>
 
-  <!-- Slideshow JS (unchanged) -->
+  <!-- Slideshow JS -->
   <script>
     const images = [
       'images/photo1.JPG',
