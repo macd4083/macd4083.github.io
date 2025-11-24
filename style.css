@@ -31,25 +31,28 @@ body {
 /* Slideshow container */
 .slideshow {
   position: relative;
-  max-width: 90%;     /* slim white bars */
-  height: 90vh;       /* fixed height */
-  overflow: hidden;
+  width: 90%;        /* slim white bars */
+  height: 90vh;      /* fixed height */
+  max-width: 1200px;
   margin: 0 auto;
   background: #000;
   border-radius: 8px;
+  overflow: hidden;
+
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Images show full size without cropping */
 .slideshow img {
-  max-height: 100%;   /* never taller than container */
-  width: auto;        /* scale width proportionally */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;  /* show the whole image, no cropping */
   display: block;
-  margin: 0 auto;     /* center horizontally */
+  margin: 0 auto;
   border-radius: 8px;
 }
+
 /* Buttons unchanged */
 button {
   position: absolute;
