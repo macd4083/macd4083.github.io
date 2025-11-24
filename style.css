@@ -11,7 +11,7 @@ body {
   background: url('images/fit.jpg') no-repeat center center fixed;
   background-size: cover;
   min-height: 80vh;        /* taller hero so more image shows */
-  padding-bottom: 200px;   /* pushes content down, reveals more background */
+  padding-bottom: 180px;   /* pushes content down, reveals more background */
 }
 
 /* White gradient overlay fading down */
@@ -24,7 +24,7 @@ body {
   background: linear-gradient(
     to bottom,
     rgba(255,255,255,0) 80%,
-    rgba(255,255,255,0.6) 100%
+    rgba(255,255,255,1) 100%
   );
   pointer-events: none;
 }
