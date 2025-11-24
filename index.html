@@ -7,45 +7,43 @@
   <style>
     body {
       margin: 0;
-      background-color: #000;
+      background-color: #fff; /* white background for whole page */
       font-family: Arial, sans-serif;
     }
 
-    /* Bio section */
+    /* Intro section */
     .bio {
-      height: 40vh; /* takes up part of the screen */
+      min-height: 60vh; /* gives white space around it */
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background-color: #f9f9f9;
-      color: #333;
       text-align: center;
+      color: #333;
       padding: 20px;
     }
 
-    /* Slideshow wrapper */
+    /* Slideshow section */
     .slideshow-section {
-      min-height: 100vh; /* fills the screen */
+      background-color: #fff;
+      padding: 40px 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      background-color: white;
     }
 
-    /* Your existing slideshow styles */
+    /* Slideshow container */
     .slideshow {
       position: relative;
-      width: 90%;       /* slim white bars on sides */
-      height: 90vh;     /* nearly full screen */
-      max-width: 1200px;
+      max-width: 90%;   /* slim white bars on sides */
+      max-height: 90vh; /* fixed size, doesn’t change when scrolling */
       overflow: hidden;
     }
 
     .slideshow img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;     /* show full image without cropping */
+      display: block;
       border-radius: 8px;
     }
 
@@ -54,7 +52,7 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 2rem;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.3);
       border: none;
       color: white;
       padding: 10px;
@@ -67,7 +65,7 @@
   </style>
 </head>
 <body>
-  <!-- Bio Section -->
+  <!-- Intro Section -->
   <section class="bio">
     <h1>Matt Macdonald</h1>
     <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
@@ -82,7 +80,7 @@
     </div>
   </section>
 
-  <!-- Your existing slideshow JS -->
+  <!-- Slideshow JS (unchanged) -->
   <script>
     const images = [
       'images/photo1.JPG',
