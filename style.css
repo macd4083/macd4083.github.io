@@ -12,7 +12,7 @@ body {
   background-size: contain;   /* show entire image */
   background-repeat: no-repeat;
   background-color: #fff;     /* fills any empty space */
-  min-height: 100vh;           /* keep some vertical size */
+  min-height: 60vh;           /* keep some vertical size */
 }
 
 /* White gradient overlay fading down */
