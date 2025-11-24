@@ -1,29 +1,59 @@
+/* Reset body for vertical flow */
 body {
   margin: 0;
-  background-color: #000;
+  background-color: #fff; /* white background for whole page */
+  font-family: Arial, sans-serif;
+  display: block;         /* normal block layout */
+  min-height: 100%;       /* allow scrolling */
+}
+
+/* Intro section */
+.bio {
+  min-height: 60vh;       /* gives white space around intro */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #333;
+  padding: 20px;
+}
+
+/* Slideshow wrapper */
+.slideshow-section {
+  background-color: #fff;
+  padding: 40px 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
+/* Slideshow container */
 .slideshow {
   position: relative;
-  width: 80%;
-  max-width: 800px;
-}
-
-.slideshow img {
-  width: 100%;
+  max-width: 90%;         /* slim white bars on sides */
+  max-height: 90vh;       /* fixed size, doesn’t change when scrolling */
+  overflow: hidden;
+  margin: 0 auto;
+  background: #000;
   border-radius: 8px;
 }
 
+/* Images show full size without cropping */
+.slideshow img {
+  width: 100%;
+  height: auto;           /* keeps full image visible */
+  display: block;
+  border-radius: 8px;
+}
+
+/* Buttons unchanged */
 button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   font-size: 2rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
   border: none;
   color: white;
   padding: 10px;
