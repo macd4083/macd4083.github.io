@@ -1,0 +1,30 @@
+{
+  "albumOrder": [1, 2, 3],
+  "albums": {
+    "1": {
+      "title": "Album 1",
+      "cover": "images/photo1.JPG",
+      "images": [
+        "images/album1/ph1s1.JPG",
+        "images/album1/ph1s2.JPG",
+        "images/album1/ph1s3.jpg"
+      ]
+    },
+    "2": {
+      "title": "Album 2",
+      "cover": "images/photo2.JPG",
+      "images": [
+        "images/album2/ph2s1.jpg",
+        "images/album2/ph2s2.jpg"
+      ]
+    },
+    "3": {
+      "title": "Album 3",
+      "cover": "images/photo3.jpg",
+      "images": [
+        "images/ph3s1.jpg",
+        "images/album-3/ph3s2.jpg"
+      ]
+    }
+  }
+}
