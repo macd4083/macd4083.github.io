@@ -8,19 +8,54 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(180deg,#222,#0a0a0a);
+  /* default gradient look so hero never appears empty */
+  background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(25,25,25,0.9));
   padding:12px;
   background-size:cover;
   background-position:center;
+  position:relative;
+  overflow:hidden;
 }
+
+/* subtle textured overlay for intensity */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.25));
+  pointer-events: none;
+}
+
+/* profile image styling */
 .profile-pic {
   height:120px;
   width:120px;
   border-radius:50%;
   object-fit:cover;
-  border:4px solid #222;
+  border:4px solid rgba(0,0,0,0.6);
   background:#111;
   display:block;
+  transform: translateZ(60px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  transition: transform 420ms ease, opacity 320ms ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* when JS sets a valid profile, we'll mark it visible */
+.profile-pic.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateZ(60px) translateY(-6px);
+}
+
+/* center overlay text (if you add any) */
+.hero .hero-text {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  color: #fff;
+  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
 }
 
 /* Bio */
@@ -105,6 +140,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 
 /* Responsive */
 @media (max-width:760px) {
+  .profile-pic { height:96px; width:96px; }
   .card { width:260px; height:160px; }
   .carousel { --carousel-height:300px; }
   .expanded-panel.open { height:320px; }
