@@ -1,0 +1,23 @@
+{
+  "albumOrder": [1, 2, 3],
+  "albums": {
+    "1": {
+      "title": "Album 1",
+      "cover": "images/folder1/photo1.JPG",
+      "images": [
+        "images/folder1/ph1s1.JPG",
+        "images/folder1/ph1s2.JPG"
+      ]
+    },
+    "2": {
+      "title": "Album 2",
+      "cover": "images/photo2.JPG",
+      "images": []
+    },
+    "3": {
+      "title": "Album 3",
+      "cover": "images/photo3.jpg",
+      "images": []
+    }
+  }
+}
