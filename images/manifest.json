@@ -11,13 +11,19 @@
     },
     "2": {
       "title": "Album 2",
-      "cover": "images/photo2.JPG",
-      "images": []
+      "cover": "images/folder2/photo2.JPG",
+      "images": [
+        "images/folder2/ph2s1.JPG",
+        "images/folder2/ph2s2.JPG"
+      ]
     },
     "3": {
       "title": "Album 3",
-      "cover": "images/photo3.jpg",
-      "images": []
+      "cover": "images/folder3/photo3.jpg",
+      "images": [
+        "images/folder3/ph3s1.jpg",
+        "images/folder3/ph3s2.JPG"
+      ]
     }
   }
 }
