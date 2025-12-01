@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Photo Slideshow</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -17,49 +18,26 @@
     <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
   </section>
 
-  <!-- Slideshow Section -->
-  <section class="slideshow-section">
-    <div class="slideshow">
-      <img id="main-image" src="images/photo1.JPG" alt="Slideshow Image" />
-      <button id="prev" aria-label="Previous">&#10094;</button>
-      <button id="next" aria-label="Next">&#10095;</button>
+  <!-- Enhanced Slideshow Section -->
+  <section class="slideshow-section" id="slideshow-section" aria-label="Photo album">
+    <div class="controls">
+      <button id="prev" aria-label="Previous" class="control-btn">&#10094;</button>
+      <button id="next" aria-label="Next" class="control-btn">&#10095;</button>
+    </div>
+
+    <div class="carousel" id="carousel" aria-hidden="false" role="list">
+      <!-- album cards injected by script -->
+    </div>
+
+    <!-- Expanded vertical scroller (hidden until clicked) -->
+    <div class="expanded-panel" id="expanded-panel" aria-hidden="true">
+      <div class="expanded-inner" id="expanded-inner" tabindex="0">
+        <!-- images injected by script when expanded -->
+      </div>
+      <button class="close-expanded" id="close-expanded" aria-label="Close expanded view">Close</button>
     </div>
   </section>
 
-  <!-- Slideshow JS -->
-  <script>
-    const images = [
-      'images/photo1.JPG',
-      'images/photo2.JPG',
-      'images/photo3.jpg'
-    ];
-
-    let current = 0;
-    const imgEl = document.getElementById('main-image');
-
-    function showImage(index) {
-      imgEl.src = images[index];
-    }
-
-    document.getElementById('prev').onclick = () => {
-      current = (current - 1 + images.length) % images.length;
-      showImage(current);
-    };
-
-    document.getElementById('next').onclick = () => {
-      current = (current + 1) % images.length;
-      showImage(current);
-    };
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') {
-        current = (current - 1 + images.length) % images.length;
-        showImage(current);
-      } else if (e.key === 'ArrowRight' || e.key === 'd') {
-        current = (current + 1) % images.length;
-        showImage(current);
-      }
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
