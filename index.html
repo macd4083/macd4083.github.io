@@ -8,9 +8,9 @@
 </head>
 <body>
   <!-- Hero Section -->
-  <section class="hero">
-    <!-- keep an <img> for profile, script will swap src or hide it if missing -->
-    <img id="profile-pic" class="profile-pic" src="images/face.jpg" alt="Profile" />
+  <section class="hero" id="hero">
+    <!-- Profile image is hidden until JS sets a valid src to avoid falling back to album cover -->
+    <img id="profile-pic" class="profile-pic" src="" alt="Profile" aria-hidden="true" />
   </section>
 
   <!-- Intro -->
