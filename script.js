@@ -1,9 +1,10 @@
-// script.js - updated to prefer profile/fit from images/folderx and keep manifest-driven album loading
-// Keeps 3D carousel, click-to-center, click-center-to-expand, keyboard nav, micro-bounce, lazy-loading
+// script.js - prefer profile/fit from images/folderx, keep hero gradient + overlay
+// Key change: profile picture will prefer folderx/face.* (won't fall back to album cover).
+// Hero keeps default gradient; if fit found it will be layered under the gradient (CSS + JS).
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
-const DEBUG = false; // set true for console logs
+const DEBUG = false;
 
 /* DOM refs */
 const carousel = document.getElementById('carousel');
@@ -13,6 +14,7 @@ const expandedPanel = document.getElementById('expanded-panel');
 const expandedInner = document.getElementById('expanded-inner');
 const closeExpanded = document.getElementById('close-expanded');
 const profilePic = document.getElementById('profile-pic');
+const heroEl = document.getElementById('hero');
 
 let albums = [];
 let cards = [];
@@ -48,7 +50,7 @@ async function fetchJson(path) {
   }
 }
 
-/* parse albums from manifest */
+/* manifest -> albums[] */
 function albumsFromManifest(manifest) {
   if (!manifest || !manifest.albums) return [];
   const order = Array.isArray(manifest.albumOrder) ? manifest.albumOrder : Object.keys(manifest.albums).map(k=>Number(k)).sort((a,b)=>a-b);
@@ -66,7 +68,7 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
-/* Discover images inside cover folder when album.images is empty (limited search) */
+/* if album.images empty -> try to discover inside cover folder (limited) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
@@ -93,11 +95,9 @@ async function discoverFromCoverFolder(album) {
   return found;
 }
 
-/* Set profile picture and hero background, prefer folderx fit/face if present */
-async function setProfilePictureAndHero() {
-  if (!profilePic) return;
-
-  // 1) prefer fit image (hero background) from images/folderx
+/* Set hero background (always keep gradient). If fit exists, layer it under gradient. */
+async function setHeroBackground() {
+  if (!heroEl) return;
   const fitCandidates = [
     'images/folderx/fit.jpg',
     'images/folderx/fit.JPG',
@@ -107,72 +107,51 @@ async function setProfilePictureAndHero() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      const heroEl = document.querySelector('.hero');
-      if (heroEl) {
-        heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url("${f}")`;
-        heroEl.style.backgroundSize = 'cover';
-        heroEl.style.backgroundPosition = 'center';
-        log('hero background set to', f);
-      }
-      break;
+      // layer gradient on top of image
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(10,10,10,0.9), rgba(20,20,20,0.85)), url("${f}")`;
+      heroEl.style.backgroundSize = 'cover';
+      heroEl.style.backgroundPosition = 'center';
+      log('hero set to', f);
+      return;
     }
   }
+  // if none found, leave CSS gradient as-is (no changes)
+  heroEl.style.backgroundImage = ''; // ensure CSS gradient from stylesheet is used
+}
 
-  // 2) prefer face image from folderx for profile
+/* Set profile picture - prefer folderx/face.* and legacy face files; DO NOT fall back to album cover */
+async function setProfilePicture() {
+  if (!profilePic) return;
   const faceCandidates = [
     'images/folderx/face.jpg',
     'images/folderx/face.JPG',
     'images/folderx/face.png',
-    'images/folderx/face.webp'
-  ];
-
-  // 3) prefer first album cover if available
-  if (Array.isArray(albums) && albums.length > 0 && albums[0].cover) {
-    // eslint-disable-next-line no-await-in-loop
-    if (await imageExists(albums[0].cover, 900)) {
-      profilePic.src = albums[0].cover;
-      profilePic.alt = albums[0].title || 'Profile';
-      profilePic.style.display = '';
-      log('profile pic set from first album cover', albums[0].cover);
-      return;
-    }
-  }
-
-  for (const c of faceCandidates) {
-    // eslint-disable-next-line no-await-in-loop
-    if (await imageExists(c, 900)) {
-      profilePic.src = c;
-      profilePic.alt = 'Profile';
-      profilePic.style.display = '';
-      log('profile pic set from folderx candidate', c);
-      return;
-    }
-  }
-
-  // 4) fallback: a few legacy locations (folder1)
-  const legacy = [
+    'images/folderx/face.webp',
     'images/face.jpg',
     'images/face.JPG',
     'images/folder1/face.jpg',
     'images/folder1/face.JPG'
   ];
-  for (const c of legacy) {
+  for (const p of faceCandidates) {
     // eslint-disable-next-line no-await-in-loop
-    if (await imageExists(c, 900)) {
-      profilePic.src = c;
+    if (await imageExists(p, 900)) {
+      profilePic.src = p;
       profilePic.alt = 'Profile';
-      profilePic.style.display = '';
-      log('profile pic set from legacy candidate', c);
+      profilePic.classList.add('visible');
+      profilePic.removeAttribute('aria-hidden');
+      log('profile pic set to', p);
       return;
     }
   }
-
-  // 5) nothing found - hide profile element (hero still may have gradient or fit)
+  // none found -> hide profile image (avoid showing a cover)
+  profilePic.src = '';
+  profilePic.classList.remove('visible');
   profilePic.style.display = 'none';
-  log('no profile image found; element hidden');
+  profilePic.setAttribute('aria-hidden', 'true');
+  log('no profile pic found - hidden');
 }
 
-/* Build carousel DOM */
+/* Build carousel */
 function buildCarousel() {
   if (!carousel) return;
   carousel.innerHTML = '';
@@ -209,7 +188,7 @@ function buildCarousel() {
   arrange(true);
 }
 
-/* arrange cards */
+/* arrange 3D */
 function arrange(initial = false) {
   const n = cards.length;
   cards.forEach((card, i) => {
@@ -326,7 +305,7 @@ setInterval(() => {
   ], { duration: 1400, easing: 'cubic-bezier(.2,.9,.2,1)' });
 }, 3000);
 
-/* init: load manifest, discover missing album images, set profile/hero, build carousel */
+/* init */
 async function init() {
   log('init: load manifest');
   let manifest = await fetchJson(MANIFEST_PATH);
@@ -338,11 +317,10 @@ async function init() {
   if (manifest && manifest.albums) {
     albums = albumsFromManifest(manifest);
   } else {
-    // fallback minimal (shouldn't be necessary if manifest exists)
     albums = [{ id:1, title:'Album 1', cover:'images/folder1/photo1.JPG', images:['images/folder1/ph1s1.JPG','images/folder1/ph1s2.JPG'] }];
   }
 
-  // For albums with empty images arrays try a limited discovery inside cover folder
+  // discovery for albums missing images
   for (let i=0;i<albums.length;i++) {
     const a = albums[i];
     if (a.cover) {
@@ -355,7 +333,6 @@ async function init() {
         }
       }
     }
-
     if (!Array.isArray(a.images) || a.images.length === 0) {
       // eslint-disable-next-line no-await-in-loop
       const discovered = await discoverFromCoverFolder(a);
@@ -364,8 +341,9 @@ async function init() {
     }
   }
 
-  // set profile pic / hero (this now checks folderx candidates)
-  await setProfilePictureAndHero();
+  // set hero & profile (folderx preferred)
+  await setHeroBackground();
+  await setProfilePicture();
 
   buildCarousel();
   log('init complete, albums:', albums.length);
