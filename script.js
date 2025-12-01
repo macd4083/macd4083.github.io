@@ -8,10 +8,14 @@
 /* ----------------- configuration ----------------- */
 
 // default fallback covers (keeps original three cover files)
+// Replace DEFAULT_ALBUMS with the block below
 const DEFAULT_ALBUMS = [
-  { id: 1, title: 'Album 1', cover: 'images/photo1.JPG' },
-  { id: 2, title: 'Album 2', cover: 'images/photo2.JPG' },
-  { id: 3, title: 'Album 3', cover: 'images/photo3.jpg' }
+  { id: 1, title: 'Album 1', cover: 'images/folder1/photo1.JPG', images: [
+    'images/folder1/ph1s1.JPG',
+    'images/folder1/ph1s2.JPG'
+  ] },
+  { id: 2, title: 'Album 2', cover: 'images/photo2.JPG', images: [] },
+  { id: 3, title: 'Album 3', cover: 'images/photo3.jpg', images: [] }
 ];
 
 const MANIFEST_PATH = 'images/manifest.json'; // recommended file to commit
