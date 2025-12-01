@@ -1,13 +1,9 @@
-// script.js - manifest-driven slideshow with robust cover & profile fallbacks
-// This version:
-//  - loads images/manifest.json (fallback to example) and uses it
-//  - for albums with empty images[], attempts a conservative discovery inside the cover's folder
-//  - bit more resilient cover/profile lookup (tries multiple fallbacks)
-//  - preserves all interactions: click-to-center, click-center-to-expand, keyboard, Esc to close, micro-bounce
+// script.js - updated to prefer profile/fit from images/folderx and keep manifest-driven album loading
+// Keeps 3D carousel, click-to-center, click-center-to-expand, keyboard nav, micro-bounce, lazy-loading
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
-const DEBUG = false; // set true to enable console debug
+const DEBUG = false; // set true for console logs
 
 /* DOM refs */
 const carousel = document.getElementById('carousel');
@@ -22,26 +18,26 @@ let albums = [];
 let cards = [];
 let current = 0;
 
-/* simple logger */
-function log(...args) { if (DEBUG) console.log(...args); }
+function log(...args) { if (DEBUG) console.log('[slideshow]', ...args); }
 
-/* Utilities */
-function imageExists(url, timeout = 1400) {
+/* quick image existence probe with timeout */
+function imageExists(url, timeout = 1200) {
   return new Promise((resolve) => {
     const img = new Image();
     let done = false;
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       if (done) return;
       done = true;
       img.onload = img.onerror = null;
       resolve(false);
     }, timeout);
-    img.onload = () => { if (done) return; done = true; clearTimeout(timer); resolve(true); };
-    img.onerror = () => { if (done) return; done = true; clearTimeout(timer); resolve(false); };
+    img.onload = () => { if (done) return; done = true; clearTimeout(t); resolve(true); };
+    img.onerror = () => { if (done) return; done = true; clearTimeout(t); resolve(false); };
     img.src = url;
   });
 }
 
+/* fetch json safely */
 async function fetchJson(path) {
   try {
     const r = await fetch(path, { cache: 'no-store' });
@@ -52,6 +48,7 @@ async function fetchJson(path) {
   }
 }
 
+/* parse albums from manifest */
 function albumsFromManifest(manifest) {
   if (!manifest || !manifest.albums) return [];
   const order = Array.isArray(manifest.albumOrder) ? manifest.albumOrder : Object.keys(manifest.albums).map(k=>Number(k)).sort((a,b)=>a-b);
@@ -69,7 +66,7 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
-/* If an album has no images[] in the manifest, try looking in the cover's folder for ph{album}s{n} files */
+/* Discover images inside cover folder when album.images is empty (limited search) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
@@ -77,13 +74,13 @@ async function discoverFromCoverFolder(album) {
   const found = [];
   let consecutiveMisses = 0;
   const consecutiveLimit = 3;
-  const maxIndex = 25;
+  const maxIndex = 20;
   for (let idx = 1; idx <= maxIndex; idx++) {
     let foundForIndex = false;
     for (const ext of exts) {
       const path = `${folder}/ph${album.id}s${idx}${ext}`;
       // eslint-disable-next-line no-await-in-loop
-      if (await imageExists(path, 1000)) {
+      if (await imageExists(path, 900)) {
         found.push(path);
         foundForIndex = true;
         break;
@@ -92,34 +89,87 @@ async function discoverFromCoverFolder(album) {
     if (!foundForIndex) consecutiveMisses++; else consecutiveMisses = 0;
     if (consecutiveMisses >= consecutiveLimit) break;
   }
-  log('discoverFromCoverFolder', album.id, 'found', found.length, 'in', folder);
+  log('discoverFromCoverFolder', album.id, 'found', found.length);
   return found;
 }
 
-/* Pick a profile picture from several candidate locations */
-async function setProfilePicture() {
+/* Set profile picture and hero background, prefer folderx fit/face if present */
+async function setProfilePictureAndHero() {
   if (!profilePic) return;
-  const candidates = [
-    'images/face.jpg',
-    'images/face.JPG',
-    'images/profile.jpg',
-    'images/profile.JPG',
-    'images/folder1/face.jpg',
-    'images/folder1/face.JPG',
-    'images/folder1/profile.jpg'
+
+  // 1) prefer fit image (hero background) from images/folderx
+  const fitCandidates = [
+    'images/folderx/fit.jpg',
+    'images/folderx/fit.JPG',
+    'images/folderx/fit.png',
+    'images/folderx/fit.webp'
   ];
-  for (const c of candidates) {
+  for (const f of fitCandidates) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await imageExists(f, 900)) {
+      const heroEl = document.querySelector('.hero');
+      if (heroEl) {
+        heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url("${f}")`;
+        heroEl.style.backgroundSize = 'cover';
+        heroEl.style.backgroundPosition = 'center';
+        log('hero background set to', f);
+      }
+      break;
+    }
+  }
+
+  // 2) prefer face image from folderx for profile
+  const faceCandidates = [
+    'images/folderx/face.jpg',
+    'images/folderx/face.JPG',
+    'images/folderx/face.png',
+    'images/folderx/face.webp'
+  ];
+
+  // 3) prefer first album cover if available
+  if (Array.isArray(albums) && albums.length > 0 && albums[0].cover) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await imageExists(albums[0].cover, 900)) {
+      profilePic.src = albums[0].cover;
+      profilePic.alt = albums[0].title || 'Profile';
+      profilePic.style.display = '';
+      log('profile pic set from first album cover', albums[0].cover);
+      return;
+    }
+  }
+
+  for (const c of faceCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(c, 900)) {
       profilePic.src = c;
       profilePic.alt = 'Profile';
-      log('profile pic set to', c);
+      profilePic.style.display = '';
+      log('profile pic set from folderx candidate', c);
       return;
     }
   }
-  // if none found, hide image element gracefully
+
+  // 4) fallback: a few legacy locations (folder1)
+  const legacy = [
+    'images/face.jpg',
+    'images/face.JPG',
+    'images/folder1/face.jpg',
+    'images/folder1/face.JPG'
+  ];
+  for (const c of legacy) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await imageExists(c, 900)) {
+      profilePic.src = c;
+      profilePic.alt = 'Profile';
+      profilePic.style.display = '';
+      log('profile pic set from legacy candidate', c);
+      return;
+    }
+  }
+
+  // 5) nothing found - hide profile element (hero still may have gradient or fit)
   profilePic.style.display = 'none';
-  log('profile pic not found; hid element');
+  log('no profile image found; element hidden');
 }
 
 /* Build carousel DOM */
@@ -159,7 +209,7 @@ function buildCarousel() {
   arrange(true);
 }
 
-/* Arrange cards in 3D */
+/* arrange cards */
 function arrange(initial = false) {
   const n = cards.length;
   cards.forEach((card, i) => {
@@ -194,7 +244,7 @@ function arrange(initial = false) {
   });
 }
 
-/* Navigation handlers */
+/* navigation */
 if (prevBtn) prevBtn.addEventListener('click', () => { current = (current - 1 + albums.length) % albums.length; arrange(); });
 if (nextBtn) nextBtn.addEventListener('click', () => { current = (current + 1) % albums.length; arrange(); });
 
@@ -207,7 +257,7 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowRight' || e.key === 'd') { current = (current + 1) % albums.length; arrange(); }
 });
 
-/* Expanded view functions */
+/* expanded view */
 function openExpandedViewForAlbum(album) {
   if (!expandedPanel || !expandedInner) return;
   expandedInner.innerHTML = '';
@@ -219,7 +269,6 @@ function openExpandedViewForAlbum(album) {
   loader.textContent = 'Loading album…';
   expandedInner.appendChild(loader);
 
-  // use album.images (already discovered or from manifest)
   const images = Array.isArray(album.images) ? album.images.slice() : [];
 
   expandedInner.innerHTML = '';
@@ -266,7 +315,7 @@ function closeExpandedView() {
 }
 if (closeExpanded) closeExpanded.addEventListener('click', closeExpandedView);
 
-/* Micro-bounce */
+/* micro-bounce */
 setInterval(() => {
   const centerCard = cards[current];
   if (!centerCard || (expandedPanel && expandedPanel.classList.contains('open'))) return;
@@ -277,39 +326,32 @@ setInterval(() => {
   ], { duration: 1400, easing: 'cubic-bezier(.2,.9,.2,1)' });
 }, 3000);
 
-/* Bootstrap: load manifest, attempt discovery for empty albums, then build */
+/* init: load manifest, discover missing album images, set profile/hero, build carousel */
 async function init() {
-  log('initializing slideshow - fetching manifest');
+  log('init: load manifest');
   let manifest = await fetchJson(MANIFEST_PATH);
   if (!manifest) {
-    log('manifest.json not found, trying fallback example manifest');
+    log('manifest missing; trying fallback');
     manifest = await fetchJson(MANIFEST_FALLBACK);
-  } else {
-    log('manifest loaded', MANIFEST_PATH);
   }
 
   if (manifest && manifest.albums) {
     albums = albumsFromManifest(manifest);
   } else {
-    // last resort defaults (shouldn't be needed if manifest present)
-    albums = [
-      { id: 1, title: 'Album 1', cover: 'images/folder1/photo1.JPG', images: ['images/folder1/ph1s1.JPG', 'images/folder1/ph1s2.JPG'] }
-    ];
+    // fallback minimal (shouldn't be necessary if manifest exists)
+    albums = [{ id:1, title:'Album 1', cover:'images/folder1/photo1.JPG', images:['images/folder1/ph1s1.JPG','images/folder1/ph1s2.JPG'] }];
   }
 
-  // ensure cover paths available and discover images when arrays are empty
-  for (let i = 0; i < albums.length; i++) {
+  // For albums with empty images arrays try a limited discovery inside cover folder
+  for (let i=0;i<albums.length;i++) {
     const a = albums[i];
-    // if cover doesn't exist, try first image as cover
     if (a.cover) {
-      // eslint-disable-next-line no-await-in-loop
       if (!(await imageExists(a.cover, 900))) {
-        // try first image in a.images
+        // try first listed image if present
         if (Array.isArray(a.images) && a.images[0] && await imageExists(a.images[0], 900)) {
           a.cover = a.images[0];
-          log('replaced missing cover with first image for album', a.id);
         } else {
-          log('cover not found for album', a.id, a.cover);
+          log('cover missing for album', a.id, a.cover);
         }
       }
     }
@@ -317,23 +359,19 @@ async function init() {
     if (!Array.isArray(a.images) || a.images.length === 0) {
       // eslint-disable-next-line no-await-in-loop
       const discovered = await discoverFromCoverFolder(a);
-      if (discovered && discovered.length > 0) {
-        a.images = discovered;
-        log('discovered images for album', a.id, discovered.length);
-      } else {
-        a.images = [];
-        log('no images discovered for album', a.id);
-      }
+      if (discovered && discovered.length > 0) a.images = discovered;
+      else a.images = [];
     }
   }
 
-  // set profile picture (tries several candidate locations)
-  await setProfilePicture();
+  // set profile pic / hero (this now checks folderx candidates)
+  await setProfilePictureAndHero();
 
   buildCarousel();
-  log('carousel built with', albums.length, 'albums');
+  log('init complete, albums:', albums.length);
+
   // warm covers
-  albums.forEach(a => { if (a && a.cover) { const ii = new Image(); ii.src = a.cover; } });
+  albums.forEach(a => { if (a && a.cover) { const im = new Image(); im.src = a.cover; } });
 }
 
 init();
