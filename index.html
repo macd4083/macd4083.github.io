@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>Photo Slideshow</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Hero Section with background -->
+  <!-- Hero Section -->
   <section class="hero">
-    <img class="profile-pic" src="images/face.jpg" alt="Matt Macdonald" />
+    <img id="profile-pic" class="profile-pic" src="images/face.jpg" alt="Profile" />
   </section>
 
-  <!-- Intro Section (white background) -->
+  <!-- Intro -->
   <section class="bio">
     <h1>Matt Macdonald</h1>
     <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
   </section>
 
-  <!-- Enhanced Slideshow Section -->
+  <!-- Slideshow Section -->
   <section class="slideshow-section" id="slideshow-section" aria-label="Photo album">
     <div class="controls">
       <button id="prev" aria-label="Previous" class="control-btn">&#10094;</button>
       <button id="next" aria-label="Next" class="control-btn">&#10095;</button>
     </div>
 
-    <div class="carousel" id="carousel" aria-hidden="false" role="list">
+    <div class="carousel" id="carousel" role="list" aria-live="polite">
       <!-- album cards injected by script -->
     </div>
 
-    <!-- Expanded vertical scroller (hidden until clicked) -->
+    <!-- Expanded vertical scroller -->
     <div class="expanded-panel" id="expanded-panel" aria-hidden="true">
       <div class="expanded-inner" id="expanded-inner" tabindex="0" role="region" aria-label="Expanded album view">
-        <!-- images injected by script when expanded -->
+        <!-- expanded images injected here -->
       </div>
       <button class="close-expanded" id="close-expanded" aria-label="Close expanded view">Close</button>
     </div>
