@@ -1,4 +1,4 @@
-// script.js - small adjustments: hero background position and layering tweaks to remove seam and brighten image
+// script.js - small adjustments: hero background now uses the image directly (no gradient overlay)
 // unchanged: manifest-driven carousel and expanded behavior
 
 const MANIFEST_PATH = 'images/manifest.json';
@@ -87,8 +87,7 @@ async function discoverFromCoverFolder(album) {
   return found;
 }
 
-/* Hero background: if fit image exists, layer under a light overlay and position a little higher
-   to reveal more of the top of the image. This helps the hero read brighter and removes seam. */
+/* Hero background: prefer the fit image in images/folderx. Use the image directly (no gradient overlay). */
 async function setHeroBackground() {
   if (!heroEl) return;
   const fitCandidates = [
@@ -100,8 +99,7 @@ async function setHeroBackground() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      // use a very light dark overlay (low alpha) and position image to show more top
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.16), rgba(16,16,16,0.06)), url("${f}")`;
+      heroEl.style.backgroundImage = `url("${f}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center 14%'; // show more of top of image
       heroEl.style.backgroundRepeat = 'no-repeat';
@@ -109,7 +107,40 @@ async function setHeroBackground() {
       return;
     }
   }
-  // fallback: remove inline backgroundImage so CSS gradient remains
+
+  // fallback: try first album cover if available
+  try {
+    if (Array.isArray(albums) && albums.length > 0 && albums[0].cover) {
+      const c = albums[0].cover;
+      // eslint-disable-next-line no-await-in-loop
+      if (await imageExists(c, 900)) {
+        heroEl.style.backgroundImage = `url("${c}")`;
+        heroEl.style.backgroundSize = 'cover';
+        heroEl.style.backgroundPosition = 'center 14%';
+        heroEl.style.backgroundRepeat = 'no-repeat';
+        log('hero background set to album cover', c);
+        return;
+      }
+    }
+  } catch (e) {
+    log('error while checking album cover fallback', e);
+  }
+
+  // Additional generic fallback filenames
+  const fallbackCandidates = ['images/hero.jpg', 'images/hero.JPG', 'images/hero.webp', 'images/hero.png'];
+  for (const f of fallbackCandidates) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await imageExists(f, 900)) {
+      heroEl.style.backgroundImage = `url("${f}")`;
+      heroEl.style.backgroundSize = 'cover';
+      heroEl.style.backgroundPosition = 'center 14%';
+      heroEl.style.backgroundRepeat = 'no-repeat';
+      log('hero background set to fallback', f);
+      return;
+    }
+  }
+
+  // final fallback: remove inline backgroundImage so CSS fallback remains (which is now plain)
   heroEl.style.backgroundImage = '';
 }
 
@@ -232,7 +263,7 @@ function openExpandedViewForAlbum(album) {
 
   const loader = document.createElement('div');
   loader.className = 'loader';
-  loader.textContent = 'Loading album…';
+  loader.textContent = 'Loading album\u2026';
   expandedInner.appendChild(loader);
 
   const images = Array.isArray(album.images) ? album.images.slice() : [];
@@ -276,7 +307,7 @@ function closeExpandedView() {
   expandedPanel.setAttribute('aria-hidden','true');
   const centerCard = cards[current];
   if (centerCard) {
-    centerCard.animate([{ transform: centerCard.style.transform }, { transform: centerCard.style.transform + ' scale(1.06)' }, { transform: centerCard.style.transform }], { duration: 420, easing: 'ease-out' });
+    centerCard.animate([{ transform: centerCard.style.transform }, { transform: centerCard.style.transform + ' scale(1.06)' }, { transform: centerCard.style.transform }], { duration: 420, easing: 'cubic-bezier(.2,.9,.2,1)' });
   }
 }
 if (closeExpanded) closeExpanded.addEventListener('click', closeExpandedView);
