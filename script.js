@@ -1,5 +1,5 @@
-// script.js - adjust hero gradient layering and profile brightness
-// Keeps manifest-driven carousel and expanded behavior; only tightens hero/profile logic
+// script.js - small adjustments to hero/profile logic and layering to remove seam and brighten the hero
+// Keeps manifest-driven carousel and expanded behavior
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
@@ -19,6 +19,7 @@ const heroEl = document.getElementById('hero');
 let albums = [];
 let cards = [];
 let current = 0;
+
 function log(...args){ if (DEBUG) console.log('[slideshow]',...args); }
 
 function imageExists(url, timeout = 1200) {
@@ -59,6 +60,7 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
+/* Discover images inside cover folder when album.images empty (limited search) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
@@ -85,8 +87,8 @@ async function discoverFromCoverFolder(album) {
   return found;
 }
 
-/* Hero background: keep CSS gradient base; if a fit image is present, layer it under the gradient
-   Use a lighter overlay so the image remains bright. */
+/* Hero background: layer fit under a light gradient so image reads bright.
+   We ensure hero pseudo-element (blend to white) sits above the page content by using hero's z-index in CSS. */
 async function setHeroBackground() {
   if (!heroEl) return;
   const fitCandidates = [
@@ -98,8 +100,8 @@ async function setHeroBackground() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      // lighter overlay stops the image from being overly dark
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.28), rgba(16,16,16,0.12)), url("${f}")`;
+      // use a very light dark overlay to keep image bright but still readable
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.18), rgba(16,16,16,0.08)), url("${f}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center';
       heroEl.style.backgroundRepeat = 'no-repeat';
@@ -107,12 +109,11 @@ async function setHeroBackground() {
       return;
     }
   }
-  // fallback: leave CSS gradient (remove inline image if previously set)
+  // fallback: remove inline backgroundImage so CSS gradient is used
   heroEl.style.backgroundImage = '';
 }
 
-/* Profile picture: prefer folderx/face.*, legacy locations next. Do NOT fallback to album cover.
-   When found, make visible and ensure it's slightly brightened by CSS overlay. */
+/* Profile picture: prefer folderx/face.* then fall back to legacy. Rim is on wrapper (not the img) */
 async function setProfilePicture() {
   if (!profilePic || !profileWrap) return;
   const faceCandidates = [
@@ -136,14 +137,14 @@ async function setProfilePicture() {
       return;
     }
   }
-  // none found -> hide profile, but keep hero background (no cover fallback)
+  // none found -> hide profile, but keep hero background
   profilePic.src = '';
   profilePic.classList.remove('visible');
   profileWrap.style.display = 'none';
   log('no profile pic found - hidden');
 }
 
-/* Carousel & UX code (unchanged) */
+/* Build carousel (unchanged) */
 function buildCarousel() {
   if (!carousel) return;
   carousel.innerHTML = '';
@@ -210,6 +211,7 @@ function arrange(initial=false) {
   });
 }
 
+/* navigation & expanded logic (unchanged) */
 if (prevBtn) prevBtn.addEventListener('click', ()=>{ current = (current - 1 + albums.length) % albums.length; arrange(); });
 if (nextBtn) nextBtn.addEventListener('click', ()=>{ current = (current + 1) % albums.length; arrange(); });
 
@@ -279,6 +281,7 @@ function closeExpandedView() {
 }
 if (closeExpanded) closeExpanded.addEventListener('click', closeExpandedView);
 
+/* micro-bounce */
 setInterval(()=> {
   const centerCard = cards[current];
   if (!centerCard || (expandedPanel && expandedPanel.classList.contains('open'))) return;
