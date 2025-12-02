@@ -1,5 +1,5 @@
-// script.js - small adjustments to ensure hero gradient layering and profile uses folderx/face if present
-// This file keeps existing manifest-driven carousel behavior and only modifies hero/profile logic and timing.
+// script.js - adjust hero gradient layering and profile brightness
+// Keeps manifest-driven carousel and expanded behavior; only tightens hero/profile logic
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
@@ -19,19 +19,13 @@ const heroEl = document.getElementById('hero');
 let albums = [];
 let cards = [];
 let current = 0;
-
-function log(...args) { if (DEBUG) console.log('[slideshow]', ...args); }
+function log(...args){ if (DEBUG) console.log('[slideshow]',...args); }
 
 function imageExists(url, timeout = 1200) {
   return new Promise((resolve) => {
     const img = new Image();
     let done = false;
-    const t = setTimeout(() => {
-      if (done) return;
-      done = true;
-      img.onload = img.onerror = null;
-      resolve(false);
-    }, timeout);
+    const t = setTimeout(()=>{ if (done) return; done = true; img.onload = img.onerror = null; resolve(false); }, timeout);
     img.onload = () => { if (done) return; done = true; clearTimeout(t); resolve(true); };
     img.onerror = () => { if (done) return; done = true; clearTimeout(t); resolve(false); };
     img.src = url;
@@ -40,10 +34,10 @@ function imageExists(url, timeout = 1200) {
 
 async function fetchJson(path) {
   try {
-    const r = await fetch(path, { cache: 'no-store' });
+    const r = await fetch(path, { cache:'no-store' });
     if (!r.ok) return null;
     return await r.json();
-  } catch (e) {
+  } catch(e) {
     return null;
   }
 }
@@ -65,21 +59,20 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
-/* Discover images inside cover folder when album.images empty (limited search) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
-  const exts = ['.JPG', '.jpg', '.jpeg', '.png', '.webp'];
+  const exts = ['.JPG','.jpg','.jpeg','.png','.webp'];
   const found = [];
   let consecutiveMisses = 0;
   const consecutiveLimit = 3;
   const maxIndex = 20;
-  for (let idx = 1; idx <= maxIndex; idx++) {
+  for (let idx=1; idx<=maxIndex; idx++){
     let foundForIndex = false;
-    for (const ext of exts) {
+    for (const ext of exts){
       const path = `${folder}/ph${album.id}s${idx}${ext}`;
       // eslint-disable-next-line no-await-in-loop
-      if (await imageExists(path, 900)) {
+      if (await imageExists(path,900)){
         found.push(path);
         foundForIndex = true;
         break;
@@ -88,12 +81,12 @@ async function discoverFromCoverFolder(album) {
     if (!foundForIndex) consecutiveMisses++; else consecutiveMisses = 0;
     if (consecutiveMisses >= consecutiveLimit) break;
   }
-  log('discoverFromCoverFolder', album.id, 'found', found.length);
+  log('discoverFromCoverFolder', album.id, '->', found.length);
   return found;
 }
 
-/* Hero background: keep the CSS gradient by default. If a fit image exists, layer it under the gradient
-   (we set inline style backgroundImage so ::after bottom blend still works). */
+/* Hero background: keep CSS gradient base; if a fit image is present, layer it under the gradient
+   Use a lighter overlay so the image remains bright. */
 async function setHeroBackground() {
   if (!heroEl) return;
   const fitCandidates = [
@@ -105,19 +98,21 @@ async function setHeroBackground() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(12,12,12,0.96), rgba(22,22,22,0.92)), url("${f}")`;
+      // lighter overlay stops the image from being overly dark
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.28), rgba(16,16,16,0.12)), url("${f}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center';
+      heroEl.style.backgroundRepeat = 'no-repeat';
       log('hero background set to', f);
       return;
     }
   }
-  // fallback: use just CSS gradient (reset inline backgroundImage)
+  // fallback: leave CSS gradient (remove inline image if previously set)
   heroEl.style.backgroundImage = '';
 }
 
-/* Profile picture: prefer folderx/face.* and legacy face files.
-   DO NOT fall back to album cover — user requested profile picture remains distinct. */
+/* Profile picture: prefer folderx/face.*, legacy locations next. Do NOT fallback to album cover.
+   When found, make visible and ensure it's slightly brightened by CSS overlay. */
 async function setProfilePicture() {
   if (!profilePic || !profileWrap) return;
   const faceCandidates = [
@@ -132,32 +127,32 @@ async function setProfilePicture() {
   ];
   for (const p of faceCandidates) {
     // eslint-disable-next-line no-await-in-loop
-    if (await imageExists(p, 900)) {
+    if (await imageExists(p,900)) {
       profilePic.src = p;
       profilePic.alt = 'Profile';
       profilePic.classList.add('visible');
-      profileWrap.style.display = ''; // ensure visible
+      profileWrap.style.display = '';
       log('profile pic set to', p);
       return;
     }
   }
-  // none found -> hide profile, but keep hero background
+  // none found -> hide profile, but keep hero background (no cover fallback)
   profilePic.src = '';
   profilePic.classList.remove('visible');
   profileWrap.style.display = 'none';
-  log('no profile pic found - hidden profile element');
+  log('no profile pic found - hidden');
 }
 
-/* Build carousel DOM */
+/* Carousel & UX code (unchanged) */
 function buildCarousel() {
   if (!carousel) return;
   carousel.innerHTML = '';
-  cards = albums.map((album, i) => {
+  cards = albums.map((album,i) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.index = i;
     card.dataset.albumId = album.id;
-    card.setAttribute('role', 'listitem');
+    card.setAttribute('role','listitem');
 
     const img = document.createElement('img');
     img.src = album.cover;
@@ -171,12 +166,8 @@ function buildCarousel() {
 
     card.addEventListener('click', () => {
       const idx = Number(card.dataset.index);
-      if (idx === current) {
-        toggleExpanded();
-      } else {
-        current = idx;
-        arrange();
-      }
+      if (idx === current) toggleExpanded();
+      else { current = idx; arrange(); }
     });
 
     carousel.appendChild(card);
@@ -185,13 +176,12 @@ function buildCarousel() {
   arrange(true);
 }
 
-/* arrange 3D */
-function arrange(initial = false) {
+function arrange(initial=false) {
   const n = cards.length;
-  cards.forEach((card, i) => {
+  cards.forEach((card,i) => {
     let offset = i - current;
-    if (offset > n / 2) offset -= n;
-    if (offset < -n / 2) offset += n;
+    if (offset > n/2) offset -= n;
+    if (offset < -n/2) offset += n;
 
     const spacingX = 96;
     const rotateY = offset * -16;
@@ -204,10 +194,10 @@ function arrange(initial = false) {
     card.style.transform = transform;
     card.style.zIndex = zIndex;
 
-    card.classList.remove('center', 'behind', 'far-behind');
+    card.classList.remove('center','behind','far-behind');
     if (offset === 0) {
       card.classList.add('center');
-      card.setAttribute('aria-current', 'true');
+      card.setAttribute('aria-current','true');
       card.style.pointerEvents = 'auto';
     } else {
       card.removeAttribute('aria-current');
@@ -220,9 +210,8 @@ function arrange(initial = false) {
   });
 }
 
-/* navigation */
-if (prevBtn) prevBtn.addEventListener('click', () => { current = (current - 1 + albums.length) % albums.length; arrange(); });
-if (nextBtn) nextBtn.addEventListener('click', () => { current = (current + 1) % albums.length; arrange(); });
+if (prevBtn) prevBtn.addEventListener('click', ()=>{ current = (current - 1 + albums.length) % albums.length; arrange(); });
+if (nextBtn) nextBtn.addEventListener('click', ()=>{ current = (current + 1) % albums.length; arrange(); });
 
 document.addEventListener('keydown', (e) => {
   if (expandedPanel && expandedPanel.classList.contains('open')) {
@@ -233,12 +222,11 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowRight' || e.key === 'd') { current = (current + 1) % albums.length; arrange(); }
 });
 
-/* expanded view */
 function openExpandedViewForAlbum(album) {
   if (!expandedPanel || !expandedInner) return;
   expandedInner.innerHTML = '';
   expandedPanel.classList.add('open');
-  expandedPanel.setAttribute('aria-hidden', 'false');
+  expandedPanel.setAttribute('aria-hidden','false');
 
   const loader = document.createElement('div');
   loader.className = 'loader';
@@ -256,18 +244,18 @@ function openExpandedViewForAlbum(album) {
     return;
   }
 
-  images.forEach((src, i) => {
+  images.forEach((src,i) => {
     const item = document.createElement('div');
     item.className = 'expanded-item';
     const img = document.createElement('img');
     img.src = src;
-    img.alt = `${album.title} photo ${i + 1}`;
+    img.alt = `${album.title} photo ${i+1}`;
     img.loading = 'lazy';
     item.appendChild(img);
     expandedInner.appendChild(item);
   });
 
-  requestAnimationFrame(() => {
+  requestAnimationFrame(()=> {
     const node = expandedInner.children[0];
     if (node) node.scrollIntoView({ behavior: 'smooth', block: 'center' });
     expandedInner.focus();
@@ -283,7 +271,7 @@ function toggleExpanded() {
 function closeExpandedView() {
   if (!expandedPanel) return;
   expandedPanel.classList.remove('open');
-  expandedPanel.setAttribute('aria-hidden', 'true');
+  expandedPanel.setAttribute('aria-hidden','true');
   const centerCard = cards[current];
   if (centerCard) {
     centerCard.animate([{ transform: centerCard.style.transform }, { transform: centerCard.style.transform + ' scale(1.06)' }, { transform: centerCard.style.transform }], { duration: 420, easing: 'ease-out' });
@@ -291,8 +279,7 @@ function closeExpandedView() {
 }
 if (closeExpanded) closeExpanded.addEventListener('click', closeExpandedView);
 
-/* micro-bounce */
-setInterval(() => {
+setInterval(()=> {
   const centerCard = cards[current];
   if (!centerCard || (expandedPanel && expandedPanel.classList.contains('open'))) return;
   centerCard.animate([
@@ -317,12 +304,11 @@ async function init() {
     albums = [{ id:1, title:'Album 1', cover:'images/folder1/photo1.JPG', images:['images/folder1/ph1s1.JPG','images/folder1/ph1s2.JPG'] }];
   }
 
-  // discovery for albums missing images
-  for (let i=0;i<albums.length;i++) {
+  for (let i=0;i<albums.length;i++){
     const a = albums[i];
     if (a.cover) {
-      if (!(await imageExists(a.cover, 900))) {
-        if (Array.isArray(a.images) && a.images[0] && await imageExists(a.images[0], 900)) {
+      if (!(await imageExists(a.cover,900))) {
+        if (Array.isArray(a.images) && a.images[0] && await imageExists(a.images[0],900)) {
           a.cover = a.images[0];
         } else {
           log('cover missing for album', a.id, a.cover);
@@ -330,21 +316,18 @@ async function init() {
       }
     }
     if (!Array.isArray(a.images) || a.images.length === 0) {
-      // eslint-disable-next-line no-await-in-loop
       const discovered = await discoverFromCoverFolder(a);
       if (discovered && discovered.length > 0) a.images = discovered;
       else a.images = [];
     }
   }
 
-  // set hero & profile (folderx preferred)
   await setHeroBackground();
   await setProfilePicture();
 
   buildCarousel();
   log('init complete, albums:', albums.length);
 
-  // warm covers
   albums.forEach(a => { if (a && a.cover) { const im = new Image(); im.src = a.cover; } });
 }
 
