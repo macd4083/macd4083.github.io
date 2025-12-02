@@ -1,6 +1,5 @@
-// script.js - prefer profile/fit from images/folderx, keep hero gradient + overlay
-// Key change: profile picture will prefer folderx/face.* (won't fall back to album cover).
-// Hero keeps default gradient; if fit found it will be layered under the gradient (CSS + JS).
+// script.js - small adjustments to ensure hero gradient layering and profile uses folderx/face if present
+// This file keeps existing manifest-driven carousel behavior and only modifies hero/profile logic and timing.
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
@@ -14,6 +13,7 @@ const expandedPanel = document.getElementById('expanded-panel');
 const expandedInner = document.getElementById('expanded-inner');
 const closeExpanded = document.getElementById('close-expanded');
 const profilePic = document.getElementById('profile-pic');
+const profileWrap = document.getElementById('profile-wrap');
 const heroEl = document.getElementById('hero');
 
 let albums = [];
@@ -22,7 +22,6 @@ let current = 0;
 
 function log(...args) { if (DEBUG) console.log('[slideshow]', ...args); }
 
-/* quick image existence probe with timeout */
 function imageExists(url, timeout = 1200) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -39,7 +38,6 @@ function imageExists(url, timeout = 1200) {
   });
 }
 
-/* fetch json safely */
 async function fetchJson(path) {
   try {
     const r = await fetch(path, { cache: 'no-store' });
@@ -50,7 +48,6 @@ async function fetchJson(path) {
   }
 }
 
-/* manifest -> albums[] */
 function albumsFromManifest(manifest) {
   if (!manifest || !manifest.albums) return [];
   const order = Array.isArray(manifest.albumOrder) ? manifest.albumOrder : Object.keys(manifest.albums).map(k=>Number(k)).sort((a,b)=>a-b);
@@ -68,7 +65,7 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
-/* if album.images empty -> try to discover inside cover folder (limited) */
+/* Discover images inside cover folder when album.images empty (limited search) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
@@ -95,7 +92,8 @@ async function discoverFromCoverFolder(album) {
   return found;
 }
 
-/* Set hero background (always keep gradient). If fit exists, layer it under gradient. */
+/* Hero background: keep the CSS gradient by default. If a fit image exists, layer it under the gradient
+   (we set inline style backgroundImage so ::after bottom blend still works). */
 async function setHeroBackground() {
   if (!heroEl) return;
   const fitCandidates = [
@@ -107,21 +105,21 @@ async function setHeroBackground() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      // layer gradient on top of image
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(10,10,10,0.9), rgba(20,20,20,0.85)), url("${f}")`;
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(12,12,12,0.96), rgba(22,22,22,0.92)), url("${f}")`;
       heroEl.style.backgroundSize = 'cover';
       heroEl.style.backgroundPosition = 'center';
-      log('hero set to', f);
+      log('hero background set to', f);
       return;
     }
   }
-  // if none found, leave CSS gradient as-is (no changes)
-  heroEl.style.backgroundImage = ''; // ensure CSS gradient from stylesheet is used
+  // fallback: use just CSS gradient (reset inline backgroundImage)
+  heroEl.style.backgroundImage = '';
 }
 
-/* Set profile picture - prefer folderx/face.* and legacy face files; DO NOT fall back to album cover */
+/* Profile picture: prefer folderx/face.* and legacy face files.
+   DO NOT fall back to album cover — user requested profile picture remains distinct. */
 async function setProfilePicture() {
-  if (!profilePic) return;
+  if (!profilePic || !profileWrap) return;
   const faceCandidates = [
     'images/folderx/face.jpg',
     'images/folderx/face.JPG',
@@ -138,20 +136,19 @@ async function setProfilePicture() {
       profilePic.src = p;
       profilePic.alt = 'Profile';
       profilePic.classList.add('visible');
-      profilePic.removeAttribute('aria-hidden');
+      profileWrap.style.display = ''; // ensure visible
       log('profile pic set to', p);
       return;
     }
   }
-  // none found -> hide profile image (avoid showing a cover)
+  // none found -> hide profile, but keep hero background
   profilePic.src = '';
   profilePic.classList.remove('visible');
-  profilePic.style.display = 'none';
-  profilePic.setAttribute('aria-hidden', 'true');
-  log('no profile pic found - hidden');
+  profileWrap.style.display = 'none';
+  log('no profile pic found - hidden profile element');
 }
 
-/* Build carousel */
+/* Build carousel DOM */
 function buildCarousel() {
   if (!carousel) return;
   carousel.innerHTML = '';
@@ -196,11 +193,11 @@ function arrange(initial = false) {
     if (offset > n / 2) offset -= n;
     if (offset < -n / 2) offset += n;
 
-    const spacingX = 92;
+    const spacingX = 96;
     const rotateY = offset * -16;
     const translateX = offset * spacingX;
-    const translateZ = -Math.abs(offset) * 60;
-    const scale = 1 - Math.min(Math.abs(offset) * 0.08, 0.46);
+    const translateZ = -Math.abs(offset) * 70;
+    const scale = 1 - Math.min(Math.abs(offset) * 0.08, 0.52);
     const zIndex = 1000 - Math.abs(offset);
 
     const transform = `translate(-50%,-50%) translateX(${translateX}px) rotateY(${rotateY}deg) translateZ(${translateZ}px) scale(${scale})`;
@@ -325,7 +322,6 @@ async function init() {
     const a = albums[i];
     if (a.cover) {
       if (!(await imageExists(a.cover, 900))) {
-        // try first listed image if present
         if (Array.isArray(a.images) && a.images[0] && await imageExists(a.images[0], 900)) {
           a.cover = a.images[0];
         } else {
