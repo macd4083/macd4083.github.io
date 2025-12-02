@@ -1,5 +1,5 @@
-// script.js - small adjustments to hero/profile logic and layering to remove seam and brighten the hero
-// Keeps manifest-driven carousel and expanded behavior
+// script.js - small adjustments: hero background position and layering tweaks to remove seam and brighten image
+// unchanged: manifest-driven carousel and expanded behavior
 
 const MANIFEST_PATH = 'images/manifest.json';
 const MANIFEST_FALLBACK = 'images/manifest.example.json';
@@ -60,7 +60,7 @@ function albumsFromManifest(manifest) {
   return out;
 }
 
-/* Discover images inside cover folder when album.images empty (limited search) */
+/* small discovery helper (only used when manifest images[] empty) */
 async function discoverFromCoverFolder(album) {
   if (!album || !album.cover) return [];
   const folder = album.cover.includes('/') ? album.cover.substring(0, album.cover.lastIndexOf('/')) : 'images';
@@ -87,8 +87,8 @@ async function discoverFromCoverFolder(album) {
   return found;
 }
 
-/* Hero background: layer fit under a light gradient so image reads bright.
-   We ensure hero pseudo-element (blend to white) sits above the page content by using hero's z-index in CSS. */
+/* Hero background: if fit image exists, layer under a light overlay and position a little higher
+   to reveal more of the top of the image. This helps the hero read brighter and removes seam. */
 async function setHeroBackground() {
   if (!heroEl) return;
   const fitCandidates = [
@@ -100,20 +100,20 @@ async function setHeroBackground() {
   for (const f of fitCandidates) {
     // eslint-disable-next-line no-await-in-loop
     if (await imageExists(f, 900)) {
-      // use a very light dark overlay to keep image bright but still readable
-      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.18), rgba(16,16,16,0.08)), url("${f}")`;
+      // use a very light dark overlay (low alpha) and position image to show more top
+      heroEl.style.backgroundImage = `linear-gradient(180deg, rgba(8,8,8,0.16), rgba(16,16,16,0.06)), url("${f}")`;
       heroEl.style.backgroundSize = 'cover';
-      heroEl.style.backgroundPosition = 'center';
+      heroEl.style.backgroundPosition = 'center 14%'; // show more of top of image
       heroEl.style.backgroundRepeat = 'no-repeat';
       log('hero background set to', f);
       return;
     }
   }
-  // fallback: remove inline backgroundImage so CSS gradient is used
+  // fallback: remove inline backgroundImage so CSS gradient remains
   heroEl.style.backgroundImage = '';
 }
 
-/* Profile picture: prefer folderx/face.* then fall back to legacy. Rim is on wrapper (not the img) */
+/* Profile picture: prefer folderx/face.*, legacy next */
 async function setProfilePicture() {
   if (!profilePic || !profileWrap) return;
   const faceCandidates = [
@@ -144,7 +144,7 @@ async function setProfilePicture() {
   log('no profile pic found - hidden');
 }
 
-/* Build carousel (unchanged) */
+/* Carousel build / arrange / nav / expanded (unchanged from previous working code) */
 function buildCarousel() {
   if (!carousel) return;
   carousel.innerHTML = '';
@@ -211,7 +211,7 @@ function arrange(initial=false) {
   });
 }
 
-/* navigation & expanded logic (unchanged) */
+/* navigation & expanded logic (same) */
 if (prevBtn) prevBtn.addEventListener('click', ()=>{ current = (current - 1 + albums.length) % albums.length; arrange(); });
 if (nextBtn) nextBtn.addEventListener('click', ()=>{ current = (current + 1) % albums.length; arrange(); });
 
