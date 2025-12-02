@@ -53,12 +53,11 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 }
 
 /* PROFILE WRAPPER
-   - switched to fixed positioning and high z-index so the profile circle always sits above the bio
-   - positioned using the hero height so visual overlap remains consistent across screen sizes
+   - fixed and top-level so it always sits above the bio and other content
 */
 .profile-wrap {
-  position: fixed;                                     /* now fixed to viewport, not inside .hero stacking context */
-  top: calc(var(--hero-height) - 78px);                /* overlap the bottom of the hero by ~78px */
+  position: fixed;
+  top: calc(var(--hero-height) - 78px); /* adjust the overlap distance here (smaller => closer) */
   left: 50%;
   transform: translateX(-50%);
   width: 156px;
@@ -68,13 +67,13 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;                                       /* very high so it sits above the bio and page content */
+  z-index: 99999; /* extremely high to guarantee front-of-page rendering */
   transition: transform 320ms ease;
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-  border: 6px solid rgba(255,255,255,0.98); /* rim as wrapper border */
+  border: 6px solid rgba(255,255,255,0.98);
   box-sizing: content-box;
-  pointer-events: auto; /* ensure the profile circle remains interactive */
+  pointer-events: auto;
 }
 
 /* profile image */
@@ -125,7 +124,13 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 }
 
 /* Slideshow */
-.slideshow-section { position:relative; padding:48px 16px 80px; background:linear-gradient(180deg,#0f0f12,#070708); overflow:visible; --carousel-height:420px; }
+.slideshow-section {
+  position:relative;
+  padding:48px 16px 80px;
+  background:linear-gradient(180deg,#0f0f12,#070708);
+  overflow:visible;
+  --carousel-height:420px;
+}
 .controls { position:absolute; top:16px; right:16px; display:flex; gap:8px; z-index:50; }
 .control-btn { background:rgba(255,255,255,0.06); color:#fff; border:0; padding:8px 12px; border-radius:8px; font-size:18px; cursor:pointer; backdrop-filter: blur(6px); transition:transform .18s; }
 .control-btn:hover { transform:translateY(-2px); background:rgba(255,255,255,0.1); }
@@ -174,7 +179,16 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .card .label { position:absolute; bottom:10px; left:12px; right:12px; color:#fff; font-weight:600; text-shadow:0 2px 8px rgba(0,0,0,0.7); font-size:14px; pointer-events:none; }
 
 /* Expanded panel */
-.expanded-panel { position:relative; max-width:1100px; margin:18px auto 0; height:0; overflow:hidden; transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease; opacity:0; border-radius:12px; }
+.expanded-panel {
+  position:relative;
+  max-width:1100px;
+  margin:18px auto 0;
+  height:0;
+  overflow:hidden;
+  transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease;
+  opacity:0;
+  border-radius:12px;
+}
 .expanded-panel.open { height:460px; opacity:1; }
 
 .expanded-inner { height:100%; overflow-y:auto; padding:18px; display:flex; gap:12px; flex-direction:column; scroll-behavior:smooth; }
@@ -187,7 +201,26 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .expanded-inner .loader { color:#333; font-size:16px; text-align:center; padding:28px 0; background:transparent; }
 
 /* Close button */
-.close-expanded { position:absolute; right:14px; top:10px; background:rgba(0,0,0,0.45); color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; z-index:60; transform:translateY(0); }
+.close-expanded {
+  position:absolute;
+  right:14px;
+  top:10px;
+  background:rgba(0,0,0,0.45);
+  color:#fff;
+  border:0;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:60;
+  transform:translateY(0);
+}
+
+/* micro-bounce visual */
+@keyframes micro-bounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
 
 /* Responsive tweaks */
 @media (max-width:980px) {
