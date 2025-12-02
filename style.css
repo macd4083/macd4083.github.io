@@ -2,64 +2,90 @@
 * { box-sizing: border-box; }
 body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin:0; background:#0b0b0d; color:#eee; }
 
-/* Hero / profile */
+/* HERO
+   - keep a visible gradient as a base so the image never looks empty
+   - if a "fit" image is present we layer it underneath the gradient
+   - add a bottom fade toward white so the hero visually blends into the bio section
+*/
 .hero {
-  height:260px;
+  width: 100%;
+  min-height: 44vh;              /* wider-than-before hero but not full screen */
+  max-height: 72vh;
   display:flex;
   align-items:center;
   justify-content:center;
-  /* default gradient look so hero never appears empty */
-  background: linear-gradient(180deg, rgba(10,10,10,0.95), rgba(25,25,25,0.9));
-  padding:12px;
-  background-size:cover;
-  background-position:center;
+  padding: 22px;
   position:relative;
   overflow:hidden;
+  /* base gradient (always shown) */
+  background: linear-gradient(180deg, rgba(12,12,12,0.96), rgba(22,22,22,0.92));
+  background-size: cover;
+  background-position: center;
 }
 
-/* subtle textured overlay for intensity */
-.hero::after {
+/* bottom blend-to-white so hero image softly transitions into the white bio */
+.hero::after{
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.25));
+  left: 0; right: 0; bottom: 0;
+  height: 26%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.9) 100%);
   pointer-events: none;
 }
 
-/* profile image styling */
-.profile-pic {
-  height:120px;
-  width:120px;
-  border-radius:50%;
-  object-fit:cover;
-  border:4px solid rgba(0,0,0,0.6);
-  background:#111;
-  display:block;
-  transform: translateZ(60px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-  transition: transform 420ms ease, opacity 320ms ease;
-  opacity: 0;
-  visibility: hidden;
+/* PROFILE WRAPPER
+   - holds <img> and a subtle gradient overlay on top of the pic (gives that blended look)
+   - we position the wrapper slightly lower (overlapping the bio) to "drop the picture down a lil"
+*/
+.profile-wrap {
+  position: absolute;
+  bottom: -72px;                 /* drop down into the bio section */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 144px;
+  height: 144px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  transition: transform 320ms ease;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
 }
 
-/* when JS sets a valid profile, we'll mark it visible */
+/* the image itself */
+.profile-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.9); /* give a bright rim so it reads on dark backgrounds */
+  transform-origin: center;
+  transition: transform 420ms ease, opacity 300ms ease;
+  opacity: 0;
+}
+
+/* visible state applied by JS once a valid profile image is found */
 .profile-pic.visible {
   opacity: 1;
-  visibility: visible;
-  transform: translateZ(60px) translateY(-6px);
+  transform: translateY(-6px) scale(1.02);
 }
 
-/* center overlay text (if you add any) */
-.hero .hero-text {
+/* overlay on the profile to blend into the page (subtle) */
+.profile-wrap::before {
+  content: "";
   position: absolute;
-  left: 18px;
-  bottom: 18px;
-  color: #fff;
-  text-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.18));
+  mix-blend-mode: overlay;
 }
 
 /* Bio */
-.bio { background:#fff; color:#111; padding:28px; text-align:center; }
+.bio { background:#fff; color:#111; padding:48px 18px 28px; text-align:center; margin-top: 86px; }
 
 /* Slideshow */
 .slideshow-section { position:relative; padding:48px 16px 80px; background:linear-gradient(180deg,#0f0f12,#070708); overflow:visible; --carousel-height:420px; }
@@ -68,7 +94,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .control-btn:hover { transform:translateY(-2px); background:rgba(255,255,255,0.1); }
 
 /* Carousel container */
-.carousel { position:relative; height:var(--carousel-height); width:100%; max-width:1100px; margin:0 auto; perspective:1400px; -webkit-perspective:1400px; }
+.carousel { position:relative; height:var(--carousel-height); width:100%; max-width:1200px; margin:0 auto; perspective:1400px; -webkit-perspective:1400px; }
 
 /* Card */
 .card {
@@ -78,8 +104,8 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   transform-style:preserve-3d;
   transform-origin:center center;
   transition: transform 700ms cubic-bezier(.2,.95,.15,1), filter 400ms ease, opacity 300ms ease;
-  width:320px;
-  height:200px;
+  width:340px;
+  height:220px;
   border-radius:14px;
   overflow:hidden;
   box-shadow: 0 20px 50px rgba(0,0,0,0.7);
@@ -101,8 +127,8 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 
 /* Center card emphasis */
 .card.center {
-  transform: translate(-50%,-50%) translateZ(140px) scale(1.03) rotateY(0deg) !important;
-  box-shadow: 0 40px 80px rgba(0,0,0,0.85);
+  transform: translate(-50%,-50%) translateZ(160px) scale(1.04) rotateY(0deg) !important;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.9);
   z-index: 999;
   filter: none;
 }
@@ -111,25 +137,13 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .card .label { position:absolute; bottom:10px; left:12px; right:12px; color:#fff; font-weight:600; text-shadow:0 2px 8px rgba(0,0,0,0.7); font-size:14px; pointer-events:none; }
 
 /* Expanded panel */
-.expanded-panel {
-  position:relative;
-  max-width:1100px;
-  margin:18px auto 0;
-  height:0;
-  overflow:hidden;
-  transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease;
-  opacity:0;
-  border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-  padding:0 0 10px 0;
-}
-.expanded-panel.open { height:420px; opacity:1; }
+.expanded-panel { position:relative; max-width:1100px; margin:18px auto 0; height:0; overflow:hidden; transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease; opacity:0; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); box-shadow: 0 30px 80px rgba(0,0,0,0.6); padding:0 0 10px 0; }
+.expanded-panel.open { height:460px; opacity:1; }
 
 .expanded-inner { height:100%; overflow-y:auto; padding:18px; display:flex; gap:12px; flex-direction:column; scroll-behavior:smooth; }
 
 /* Expanded items */
-.expanded-inner .expanded-item { height:360px; border-radius:10px; overflow:hidden; background:#000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: transform 400ms ease; }
+.expanded-inner .expanded-item { height:380px; border-radius:10px; overflow:hidden; background:#000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); transition: transform 400ms ease; }
 .expanded-inner .expanded-item img { width:100%; height:100%; object-fit:cover; display:block; }
 
 /* Loader text */
@@ -139,10 +153,17 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .close-expanded { position:absolute; right:14px; top:10px; background:rgba(0,0,0,0.45); color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; z-index:60; transform:translateY(-6px); }
 
 /* Responsive */
-@media (max-width:760px) {
-  .profile-pic { height:96px; width:96px; }
-  .card { width:260px; height:160px; }
-  .carousel { --carousel-height:300px; }
+@media (max-width:980px) {
+  .profile-wrap { bottom: -56px; width:120px; height:120px; }
+  .card { width:300px; height:200px; }
+  .carousel { --carousel-height:360px; }
+  .expanded-panel.open { height:380px; }
+  .expanded-inner .expanded-item { height:300px; }
+}
+@media (max-width:520px) {
+  .hero { min-height:36vh; padding:14px; }
+  .profile-wrap { bottom: -48px; width:96px; height:96px; }
+  .card { width:240px; height:160px; }
   .expanded-panel.open { height:320px; }
   .expanded-inner .expanded-item { height:260px; }
 }
