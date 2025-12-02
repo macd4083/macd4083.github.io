@@ -3,66 +3,75 @@
 body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin:0; background:#0b0b0d; color:#eee; }
 
 /* HERO
-   - lighter overlay so the fit image stays bright
-   - pseudo-element extended and stacked above the bio to avoid a visible seam ("black bar")
-   - hero larger/wider per request
+   - keep a light overlay so the fit image reads bright
+   - bottom pseudo now extends further and is stacked above page content to remove seam
+   - move background slightly up so more of the top of the image is visible
 */
 .hero {
   width: 100%;
-  min-height: 50vh;              /* slightly taller */
-  max-height: 76vh;
+  min-height: 56vh;              /* a bit wider per request */
+  max-height: 80vh;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 22px 12px 40px;      /* added bottom padding so profile can overlap nicely */
+  padding: 28px 12px 48px;      /* space so profile overlaps nicely */
   position:relative;
-  overflow: visible;            /* allow pseudo to extend so it blends into the bio */
-  /* base gradient (kept but light so image remains bright) */
-  background: linear-gradient(180deg, rgba(12,12,12,0.18), rgba(20,20,20,0.08));
+  overflow: visible;            /* allow pseudo to extend under bio for blending */
+  background: linear-gradient(180deg, rgba(12,12,12,0.14), rgba(22,22,22,0.06));
   background-size: cover;
-  background-position: center;
-  z-index: 20;                   /* higher than bio so pseudo can overlay the white section */
+  background-position: center 14%; /* show slightly more of the top of the image */
+  z-index: 20;
 }
 
-/* bottom blend-to-white so hero image softly transitions into the white bio
-   place this pseudo on top of the bio (hero z-index high) and extend it below hero
-   so there is no visible seam. */
+/* light top overlay so image still reads; placed under the white blend pseudo */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02));
+  pointer-events: none;
+  z-index: 22;
+}
+
+/* bottom blend-to-white
+   - larger and placed above the hero image so it covers any dark edge
+   - extends under the bio to make a smooth transition with no visible seam
+*/
 .hero::after{
   content: "";
   position: absolute;
-  left: 0; right: 0; bottom: -80px; /* extend further under the bio for clean blend */
-  height: 50%;
+  left: 0; right: 0; bottom: -120px; /* extend further into the bio */
+  height: 56%;
   pointer-events: none;
-  /* start mostly transparent and finish at white so the hero blends into the white bio */
-  background: linear-gradient(to bottom, rgba(255,255,255,0) 45%, rgba(255,255,255,1) 100%);
-  z-index: 30;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 35%, rgba(255,255,255,1) 100%);
+  z-index: 40; /* sits above hero image and overlay but below profile rim */
 }
 
 /* PROFILE WRAPPER
-   - the white rim is applied to the wrapper so it is always perfectly aligned
-   - wrapper positioned to overlap downward into the .bio section
+   - white rim is on the wrapper to keep rim always aligned
+   - adjusted size so rim sits perfectly around image
 */
 .profile-wrap {
   position: absolute;
-  bottom: -64px;                 /* drop down a little less so it sits naturally */
+  bottom: -64px;                 /* overlap into the bio (tweak to taste) */
   left: 50%;
   transform: translateX(-50%);
-  width: 152px;                  /* slightly larger so border sits cleanly around image */
-  height: 152px;
+  width: 156px;
+  height: 156px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60;                   /* on top of hero pseudo so rim reads clearly */
+  z-index: 60;                   /* above hero::after so rim reads clearly */
   transition: transform 320ms ease;
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-  border: 4px solid rgba(255,255,255,0.98); /* THE white rim around profile - on wrapper so it never gets misaligned */
-  box-sizing: content-box; /* ensure border drawn outside the image area */
+  border: 6px solid rgba(255,255,255,0.98); /* rim as wrapper border */
+  box-sizing: content-box;
 }
 
-/* profile image (no border here; rim is on the wrapper) */
+/* profile image */
 .profile-pic {
   width: 100%;
   height: 100%;
@@ -74,7 +83,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   opacity: 0;
   filter: none; /* ensure not darkened */
   position: relative;
-  z-index: 62; /* above wrapper pseudo before overlay */
+  z-index: 62;
 }
 
 /* visible state applied by JS */
@@ -83,8 +92,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   transform: translateY(-6px) scale(1.02);
 }
 
-/* subtle brightening overlay on the profile to match the hero blend
-   put the overlay under the border but above the image to brighten slightly */
+/* subtle overlay on the profile to blend with hero */
 .profile-wrap::before {
   content: "";
   position: absolute;
@@ -96,8 +104,8 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   border-radius: 50%;
 }
 
-/* ensure the bio sits above hero background but below hero's overlay - no z-index needed */
-.bio { background:#fff; color:#111; padding:56px 18px 28px; text-align:center; margin-top: 92px; position:relative; }
+/* Bio */
+.bio { background:#fff; color:#111; padding:64px 18px 28px; text-align:center; margin-top: 100px; position:relative; z-index:10; }
 
 /* Slideshow */
 .slideshow-section { position:relative; padding:48px 16px 80px; background:linear-gradient(180deg,#0f0f12,#070708); overflow:visible; --carousel-height:420px; }
@@ -166,15 +174,15 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 
 /* Responsive */
 @media (max-width:980px) {
-  .profile-wrap { bottom: -56px; width:120px; height:120px; }
+  .profile-wrap { bottom: -56px; width:120px; height:120px; border-width:5px; }
   .card { width:300px; height:200px; }
   .carousel { --carousel-height:360px; }
   .expanded-panel.open { height:380px; }
   .expanded-inner .expanded-item { height:300px; }
 }
 @media (max-width:520px) {
-  .hero { min-height:36vh; padding:14px; }
-  .profile-wrap { bottom: -48px; width:96px; height:96px; }
+  .hero { min-height:40vh; padding:14px 10px 34px; }
+  .profile-wrap { bottom: -48px; width:96px; height:96px; border-width:4px; }
   .card { width:240px; height:160px; }
   .expanded-panel.open { height:320px; }
   .expanded-inner .expanded-item { height:260px; }
