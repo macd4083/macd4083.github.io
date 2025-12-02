@@ -10,14 +10,16 @@
 <body>
   <!-- Hero Section (fixed) -->
   <section class="hero" id="hero" aria-hidden="false">
-    <div class="profile-wrap" id="profile-wrap" aria-hidden="false">
-      <img id="profile-pic" class="profile-pic" src="" alt="Profile" />
-    </div>
     <span class="visually-hidden">Hero image: landscape and prints by Matt Macdonald</span>
   </section>
 
   <!-- Spacer that keeps normal flow while hero is fixed -->
   <div class="hero-spacer" id="hero-spacer" aria-hidden="true"></div>
+
+  <!-- Profile wrapper moved out of the hero and placed at top-level so it isn't trapped in any stacking context -->
+  <div class="profile-wrap" id="profile-wrap" aria-hidden="false">
+    <img id="profile-pic" class="profile-pic" src="" alt="Profile" />
+  </div>
 
   <!-- Intro / Bio -->
   <section class="bio">
