@@ -1,11 +1,20 @@
+/* add visually-hidden utility for accessibility */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0; padding: 0; margin: -1px;
+}
+
 /* Basic layout */
 * { box-sizing: border-box; }
 body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; margin:0; background:#0b0b0d; color:#eee; }
 
 /* HERO
-   - keep a light overlay so the fit image reads bright
-   - bottom pseudo now extends further and is stacked above page content to remove seam
-   - move background slightly up so more of the top of the image is visible
+   - removed gradient overlays so the hero uses the raw image
+   - background-size/position kept so setHeroBackground can rely on them
 */
 .hero {
   width: 100%;
@@ -16,36 +25,14 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   justify-content:center;
   padding: 28px 12px 48px;      /* space so profile overlaps nicely */
   position:relative;
-  overflow: visible;            /* allow pseudo to extend under bio for blending */
-  background: linear-gradient(180deg, rgba(12,12,12,0.14), rgba(22,22,22,0.06));
+  overflow: visible;            /* allow profile to overlap bio */
+  background: none;             /* no gradient — let JS set the image directly */
   background-size: cover;
   background-position: center 14%; /* show slightly more of the top of the image */
   z-index: 20;
 }
 
-/* light top overlay so image still reads; placed under the white blend pseudo */
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.02));
-  pointer-events: none;
-  z-index: 22;
-}
-
-/* bottom blend-to-white
-   - larger and placed above the hero image so it covers any dark edge
-   - extends under the bio to make a smooth transition with no visible seam
-*/
-.hero::after{
-  content: "";
-  position: absolute;
-  left: 0; right: 0; bottom: -120px; /* extend further into the bio */
-  height: 56%;
-  pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255,255,255,0) 35%, rgba(255,255,255,1) 100%);
-  z-index: 40; /* sits above hero image and overlay but below profile rim */
-}
+/* NOTE: hero::before and hero::after previously added gradient overlays; removed intentionally */
 
 /* PROFILE WRAPPER
    - white rim is on the wrapper to keep rim always aligned
@@ -63,7 +50,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 60;                   /* above hero::after so rim reads clearly */
+  z-index: 60;                   /* above hero so rim reads clearly */
   transition: transform 320ms ease;
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
@@ -110,7 +97,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 /* Slideshow */
 .slideshow-section { position:relative; padding:48px 16px 80px; background:linear-gradient(180deg,#0f0f12,#070708); overflow:visible; --carousel-height:420px; }
 .controls { position:absolute; top:16px; right:16px; display:flex; gap:8px; z-index:50; }
-.control-btn { background:rgba(255,255,255,0.06); color:#fff; border:0; padding:8px 12px; border-radius:8px; font-size:18px; cursor:pointer; backdrop-filter: blur(6px); transition:transform .18s ease, background .18s; }
+.control-btn { background:rgba(255,255,255,0.06); color:#fff; border:0; padding:8px 12px; border-radius:8px; font-size:18px; cursor:pointer; backdrop-filter: blur(6px); transition:transform .18s; }
 .control-btn:hover { transform:translateY(-2px); background:rgba(255,255,255,0.1); }
 
 /* Carousel container */
@@ -157,7 +144,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .card .label { position:absolute; bottom:10px; left:12px; right:12px; color:#fff; font-weight:600; text-shadow:0 2px 8px rgba(0,0,0,0.7); font-size:14px; pointer-events:none; }
 
 /* Expanded panel */
-.expanded-panel { position:relative; max-width:1100px; margin:18px auto 0; height:0; overflow:hidden; transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease; opacity:0; border-radius:12px; background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); box-shadow: 0 30px 80px rgba(0,0,0,0.6); padding:0 0 10px 0; }
+.expanded-panel { position:relative; max-width:1100px; margin:18px auto 0; height:0; overflow:hidden; transition: height 600ms cubic-bezier(.2,.9,.2,1), opacity 320ms ease; opacity:0; border-radius:12px; }
 .expanded-panel.open { height:460px; opacity:1; }
 
 .expanded-inner { height:100%; overflow-y:auto; padding:18px; display:flex; gap:12px; flex-direction:column; scroll-behavior:smooth; }
@@ -170,7 +157,7 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-se
 .expanded-inner .loader { color:#333; font-size:16px; text-align:center; padding:28px 0; background:transparent; }
 
 /* Close button */
-.close-expanded { position:absolute; right:14px; top:10px; background:rgba(0,0,0,0.45); color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; z-index:60; transform:translateY(-6px); }
+.close-expanded { position:absolute; right:14px; top:10px; background:rgba(0,0,0,0.45); color:#fff; border:0; padding:8px 12px; border-radius:8px; cursor:pointer; z-index:60; transform:translateY(0); }
 
 /* Responsive */
 @media (max-width:980px) {
