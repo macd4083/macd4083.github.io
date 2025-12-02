@@ -2,19 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Photo Slideshow</title>
+  <title>Matt Macdonald Photography — Prints & Photo Albums</title>
+
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Hero Section -->
+  <!-- Hero Section (fixed) -->
   <section class="hero" id="hero" aria-hidden="false">
     <div class="profile-wrap" id="profile-wrap" aria-hidden="false">
       <img id="profile-pic" class="profile-pic" src="" alt="Profile" />
     </div>
+    <span class="visually-hidden">Hero image: landscape and prints by Matt Macdonald</span>
   </section>
 
-  <!-- Intro -->
+  <!-- Spacer that keeps normal flow while hero is fixed -->
+  <div class="hero-spacer" id="hero-spacer" aria-hidden="true"></div>
+
+  <!-- Intro / Bio -->
   <section class="bio">
     <h1>Matt Macdonald</h1>
     <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
@@ -40,6 +45,6 @@
     </div>
   </section>
 
-  <script src="script.js"></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
