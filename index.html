@@ -1,74 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <title>Matt Macdonald Photography — Prints & Photo Albums</title>
+
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Your Name — Portfolio</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <a class="brand" href="/">Your Name</a>
-      <nav class="nav">
-        <a href="#about">About</a>
-        <a href="#work">Work</a>
-        <a href="#contact">Contact</a>
-      </nav>
+ <!-- Hero Section (fixed) -->
+<section class="hero" id="hero" aria-hidden="false">
+  <div class="profile-wrap" id="profile-wrap" aria-hidden="false">
+    <img id="profile-pic" class="profile-pic" src="" alt="Profile" />
+  </div>
+  <span class="visually-hidden">Hero image: landscape and prints by Matt Macdonald</span>
+</section>
+
+<!-- Spacer that keeps normal flow while hero is fixed -->
+<div class="hero-spacer" id="hero-spacer" aria-hidden="true"></div>
+
+  <!-- Intro / Bio -->
+  <section class="bio">
+    <h1>Matt Macdonald</h1>
+    <p>Entrepreneurship student, web developer, and explorer of challenging hikes.</p>
+  </section>
+
+  <!-- Slideshow Section -->
+  <section class="slideshow-section" id="slideshow-section" aria-label="Photo album">
+    <div class="controls">
+      <button id="prev" aria-label="Previous" class="control-btn">&#10094;</button>
+      <button id="next" aria-label="Next" class="control-btn">&#10095;</button>
     </div>
-  </header>
 
-  <main>
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero__inner container">
-        <div class="hero__content">
-          <h1 class="hero__title">Hello — I'm Your Name</h1>
-          <p class="hero__subtitle">A short description or tagline about what you do.</p>
-          <p class="hero__cta">
-            <a class="btn" href="#work">See my work</a>
-          </p>
-        </div>
-
-        <!-- Avatar image: it MUST be inside the .hero so it scrolls/moves with the hero section -->
-        <img
-          src="/assets/images/avatar.jpg"
-          alt="Your Name"
-          class="hero__avatar"
-          loading="lazy"
-        />
-      </div>
-    </section>
-
-    <!-- Sample content below hero -->
-    <section id="about" class="section">
-      <div class="container">
-        <h2>About</h2>
-        <p>Short about text...</p>
-      </div>
-    </section>
-
-    <section id="work" class="section">
-      <div class="container">
-        <h2>Work</h2>
-        <p>Projects and links...</p>
-      </div>
-    </section>
-
-    <section id="contact" class="section">
-      <div class="container">
-        <h2>Contact</h2>
-        <p>Contact details...</p>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; <span id="year"></span> Your Name</p>
+    <div class="carousel" id="carousel" role="list" aria-live="polite">
+      <!-- album cards injected by script -->
     </div>
-  </footer>
 
-  <script src="js/main.js"></script>
+    <!-- Expanded vertical scroller -->
+    <div class="expanded-panel" id="expanded-panel" aria-hidden="true">
+      <div class="expanded-inner" id="expanded-inner" tabindex="0" role="region" aria-label="Expanded album view">
+        <!-- expanded images injected here -->
+      </div>
+      <button class="close-expanded" id="close-expanded" aria-label="Close expanded view">Close</button>
+    </div>
+  </section>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
